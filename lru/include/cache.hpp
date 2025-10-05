@@ -1,5 +1,5 @@
-#ifndef ARC_CACHE
-#define ARC_CACHE
+#ifndef LRU_CACHE
+#define LRU_CACHE
 
 #include <iostream>
 #include <list>
@@ -36,7 +36,9 @@ struct cache_t {
             list.splice(list.begin(), list, eltit, std::next(eltit));
         }
         return true;
+
     };
+
 
     void cache_dump() {
         for(auto i = list.begin(); i != list.end(); i++) {
