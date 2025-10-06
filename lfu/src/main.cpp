@@ -9,7 +9,7 @@ int main() {
     bool res = 0;
 
     for(int key : data) {
-        res = cache.lookup_update(key);
+        res = cache.lookup_update(key, key);
         if(res) {
             hits++;
         } else {

@@ -23,18 +23,18 @@ private:
     size_t size;                                    //cache size
     std::list<cache_cell_t<Key_t, Value_t>> list;
     size_t curr_time;                               //algorithm operation time(amount of all request)
-    int min_freq;
+    size_t min_freq;
 
     using ListIt = typename std::list<cache_cell_t<Key_t, Value_t>>::iterator;
     std::unordered_map<Key_t, ListIt> hash_table;
 public:
-    LFU_cache_t(size_t size_p) : size(size_p), list(), curr_time(0), hash_table(), min_freq(100) {};
+    LFU_cache_t(size_t size_p) : size(size_p), list(), curr_time(0), min_freq(100), hash_table() {};
 
-    bool lookup_update(Value_t value) {
+    bool lookup_update(Key_t key, Value_t value) {
         if(size == 0) return false;
 
         curr_time++;
-        auto hit = hash_table.find(value);
+        auto hit = hash_table.find(key);
 
         if(hit != hash_table.end()) {           //hit
             ListIt list_it = hit->second;
@@ -42,10 +42,12 @@ public:
             list_it->freq_of_requests++;
 
             update_cache(list_it);
+            return true;
         } else {
             if(hash_table.size() >= size) { pop_elem(); }
 
-            add_new_elem( value);
+            add_new_elem(key, value);
+            return false;
         }
 
     };
@@ -63,7 +65,7 @@ private:
     }
 
     void pop_elem() {
-         for (auto it = list.begin(); it != list.end(); it++) {
+        for (auto it = list.begin(); it != list.end(); it++) {
             if (it->freq_of_requests == min_freq) {
                 hash_table.erase(it->key);
                 list.erase(it);
@@ -72,15 +74,15 @@ private:
         }
     }
 
-    void add_new_elem(Value_t value) {
-        cache_cell_t<Key_t, Value_t> new_cell{value, value, 1};
+    void add_new_elem(Key_t key, Value_t value) {
+        cache_cell_t<Key_t, Value_t> new_cell{key, value, 1};
 
         auto it = list.begin();
         while (it != list.end() && it->freq_of_requests == 1) {
             it++;
         }
         ListIt new_it = list.insert(it, new_cell);
-        hash_table[value] = new_it;
+        hash_table[key] = new_it;
         min_freq = 1;
     }
 
