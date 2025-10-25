@@ -5,6 +5,7 @@
 #include <list>
 #include <vector>
 #include <unordered_map>
+#include <assert.h>
 
 const int INIT_MAX_FREQ = 100;
 
@@ -13,8 +14,8 @@ struct cache_cell_t {
     Key_t   key   {};
     Value_t value {};
 
-    size_t freq_of_requests{0};
-    size_t last_accessed   {0};
+    size_t freq_of_requests {};
+    size_t last_accessed    {};
 };
 
 template <typename Key_t, typename Value_t>
@@ -32,21 +33,41 @@ public:
 
     bool lookup_update(Key_t key, Value_t value) {
         if(size == 0) return false;
-
+        //print_list();
+        //std::cout << "min_freq = " << min_freq << ",curr_time = " << curr_time << std::endl;
         curr_time++;
         auto hit = hash_table.find(key);
 
-        if(hit != hash_table.end()) {           //hit
+        if (hit != hash_table.end()) {         //hit
+            //std::cout << "hit" << std::endl;
             ListIt list_it = hit->second;
-            list_it->value = value;
+            //std::cout << "list_it: " << &list_it << std::endl;
+            bool update_min_freq = 0;
+
+            if(list_it->freq_of_requests == min_freq) {
+                for(auto it = list.begin(); it != list.end(); it++) {
+                    if(it->freq_of_requests == min_freq && it != list_it) {
+                        update_min_freq = 1;
+                        break;
+                    }
+                }
+                if(!update_min_freq) {
+                    min_freq++;
+                }
+            }
             list_it->freq_of_requests++;
 
-            update_cache(list_it);
+            //update_cache(list_it);
+            //print_list();
             return true;
-        } else {
-            if(hash_table.size() >= size) { pop_elem(); }
-
+        }
+        else
+        {
+            //std::cout << "MISS" << std::endl << "LIST_SIZE = " << list.size() << " size = " << size << std::endl;
+            if(list.size() >= size) { pop_elem(); }
+            //std::cout << "chlen1" << std::endl;
             add_new_elem(key, value);
+            //print_list();
             return false;
         }
 
@@ -55,7 +76,7 @@ public:
 private:
     void update_cache(ListIt list_it) {
         auto cell = *list_it;
-        list.erase(list_it); //TODO хэш таблица не должна расти бесконечно
+        list.erase(list_it);
         auto it = list.begin();
         while (it != list.end() && it->freq_of_requests <= cell.freq_of_requests) {
             ++it;
@@ -67,17 +88,31 @@ private:
     }
 
     void pop_elem() {
-        for (auto it = list.begin(); it != list.end(); it++) {
+        ListIt candidate_for_delete = list.begin();
+        for(auto it = candidate_for_delete; it != list.end(); it++)
+        {
+            if(it->freq_of_requests == min_freq)
+            {
+                if(it->last_accessed < candidate_for_delete->last_accessed)
+                {
+                    candidate_for_delete = it;
+                }
+            }
+        }
+
+        hash_table.erase(candidate_for_delete->key);
+        list.erase(candidate_for_delete);
+        /*for (auto it = list.begin(); it != list.end(); it++) {
             if (it->freq_of_requests == min_freq) {
                 hash_table.erase(it->key);
                 list.erase(it);
                 break;
             }
-        }
+        }*/
     }
 
     void add_new_elem(Key_t key, Value_t value) {
-        cache_cell_t<Key_t, Value_t> new_cell{key, value, 1};
+        cache_cell_t<Key_t, Value_t> new_cell{key, value, 1, curr_time};
 
         auto it = list.begin();
         while (it != list.end() && it->freq_of_requests == 1) {
@@ -88,6 +123,19 @@ private:
         min_freq = 1;
     }
 
-
+    void print_list() {
+    for (auto it = list.begin(); it != list.end(); it++)
+    {
+        if (it == list.begin())
+        {
+            std::cout << it->value << "[" << it->freq_of_requests << "]";
+        }
+        else
+        {
+            std::cout << " <-> " << it->value << "[" << it->freq_of_requests << "]";
+        }
+    }
+    std::cout << std::endl;
+}
 };
 #endif

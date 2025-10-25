@@ -1,4 +1,4 @@
-.PHONY: all clean
+.PHONY: cache test clean
 
 GCC := g++
 
@@ -18,20 +18,32 @@ FLAGS := -I./include/ -D _DEBUG -ggdb3 -std=c++17 -O0 -Wall -Wextra -Weffc++ -Wa
 BUILD_DIR   := build
 SRC_DIR     := src
 INCLUDE_DIR := include
+TEST_DIR    := tests
 
-SRC_FILES := $(SRC)/main.cpp
-OBJ_FILES := $(BUILD_DIR)/main.o
+SRC_FILES       := $(SRC_DIR)/main.cpp
+CACHE_OBJ_FILES := $(BUILD_DIR)/main.o
+TESTS_OBJ_FILES := $(BUILD_DIR)/test.o
+TEST_FILES      := $(TEST_DIR)/test.cpp
 
-TARGET := $(BUILD_DIR)/cache.out
+TARGET_CACHE := $(BUILD_DIR)/cache.out
+TARGET_TEST  := $(BUILD_DIR)/test.out
 
-all: $(TARGET)
+cache: $(TARGET_CACHE)
 
-$(TARGET): $(OBJ_FILES)
-	$(GCC) $(OBJ_FILES) -o $@ $(FLAGS)
+$(TARGET_1): $(CACHE_OBJ_FILES)
+	$(GCC) $(CACHE_OBJ_FILES) -o $@ $(FLAGS)
 
 
-$(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp $(INCLUDE_DIR)/*.hpp
+$(CACHE_OBJ_FILES): $(SRC_FILES) $(INCLUDE_DIR)/*.hpp
 	$(GCC) $(FLAGS) -c $< -o $@
+
+test: $(TARGET_TEST)
+$(TARGET_2): $(TESTS_OBJ_FILES)
+	$(GCC) $(TESTS_OBJ_FILES) -o $@ $(FLAGS) -lgtest -lgtest_main -pthread
+
+
+$(TESTS_OBJ_FILES): $(TEST_FILES) $(INCLUDE_DIR)/*.hpp
+	$(GCC) $(FLAGS) -lgtest -lgtest_main -pthread -c $< -o $@
 
 clean:
 	rm -rf $(BUILD_DIR)/*.o $(BUILD_DIR)/*.out
