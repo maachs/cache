@@ -55,13 +55,15 @@ public:
 private:
     void update_cache(ListIt list_it) {
         auto cell = *list_it;
-        list.erase(list_it);
+        list.erase(list_it); //TODO хэш таблица не должна расти бесконечно
         auto it = list.begin();
         while (it != list.end() && it->freq_of_requests <= cell.freq_of_requests) {
             ++it;
         }
         ListIt new_it = list.insert(it, cell);
         hash_table[cell.key] = new_it;
+        cell.last_accessed = curr_time;
+        //std::cout << curr_time << std::endl;
     }
 
     void pop_elem() {
