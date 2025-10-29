@@ -1,4 +1,4 @@
-.PHONY: cache test clean
+.PHONY: all test clean
 
 GCC := g++
 
@@ -28,17 +28,22 @@ TEST_FILES      := $(TEST_DIR)/test.cpp
 TARGET_CACHE := $(BUILD_DIR)/cache.out
 TARGET_TEST  := $(BUILD_DIR)/test.out
 
-cache: $(TARGET_CACHE)
+all: cache
 
-$(TARGET_1): $(CACHE_OBJ_FILES)
+make_dir:
+	@mkdir -p $(BUILD_DIR)
+
+cache: make_dir $(TARGET_CACHE)
+
+$(TARGET_CACHE): $(CACHE_OBJ_FILES)
 	$(GCC) $(CACHE_OBJ_FILES) -o $@ $(FLAGS)
 
 
 $(CACHE_OBJ_FILES): $(SRC_FILES) $(INCLUDE_DIR)/*.hpp
 	$(GCC) $(FLAGS) -c $< -o $@
 
-test: $(TARGET_TEST)
-$(TARGET_2): $(TESTS_OBJ_FILES)
+test: make_dir $(TARGET_TEST)
+$(TARGET_TEST): $(TESTS_OBJ_FILES)
 	$(GCC) $(TESTS_OBJ_FILES) -o $@ $(FLAGS) -lgtest -lgtest_main -pthread
 
 
