@@ -29,7 +29,7 @@ private:
     using ListIt = typename std::list<cache_cell_t<Key_t, Value_t>>::iterator;
     std::unordered_map<Key_t, ListIt> hash_table;
 public:
-    LFU_cache_t(size_t size_p) : size(size_p), list(), curr_time(0), min_freq(100), hash_table() {};
+    LFU_cache_t(size_t size_p) : size(size_p), list(), curr_time(0), min_freq(INIT_MAX_FREQ), hash_table() {};
 
     bool lookup_update(Key_t key, Value_t value) {
         if(size == 0) return false;
