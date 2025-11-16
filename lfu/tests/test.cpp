@@ -191,3 +191,9 @@ TEST(CacheTest, TEST9)
     EXPECT_EQ(hits, 5);
     EXPECT_EQ(misses, 4);
 }
+
+int main(int argc, char **argv)
+{
+    ::testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
+}
